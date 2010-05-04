@@ -14,6 +14,7 @@ class MainPage(webapp.RequestHandler):
 application = webapp.WSGIApplication([('/', MainPage),
                                       ('/signup', SignupPage),
                                       ('/setting', SettingPage),
+                                      ('/avatar/([^/]*)', AvatarsHandler),
                                       ('/avatar/(.*)/(.*)', AvatarsHandler)], debug=True)
 
 def main():

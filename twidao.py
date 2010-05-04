@@ -96,8 +96,8 @@ class SettingPage(webapp.RequestHandler):
         if avatar:
             db.run_in_transaction(self.upload_avator, avatar)
             # add task to resize-img queue
-            taskqueue.Task(url='/task/avatar/resize',
-                           params={'username': self.user.username}
+            taskqueue.Task(url='/task/avatar/resize?username=%s' % self.user.username,
+                           method='GET',
                            ).add(queue_name='avatar')
         if self.user.fullname == fullname and self.user.bio == bio:
             self.redirect('/setting')
