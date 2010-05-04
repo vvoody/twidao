@@ -111,3 +111,11 @@ class SettingPage(webapp.RequestHandler):
             self.response.out.write(template.render(path, template_values))
         else:
             self.redirect('/setting')
+
+# Deal with request like /avatar/john/bigger
+class AvatarsHandler(webapp.RequestHandler):
+    def get(self, user, size='normal'):
+        parent = models.Members.get_by_key_name(user).key()
+        avatar = models.Avatars.get_by_key_name(user, parent=parent)
+        self.response.headers['Content-Type'] = 'image'
+        self.response.out.write(avatar.origin)

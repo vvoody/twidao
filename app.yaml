@@ -22,6 +22,8 @@ handlers:
 - url: /setting
   script: main.py
   login: required
+- url: /avatar/.*
+  script: main.py
 - url: /admin/.*
   script: $PYTHON_LIB/google/appengine/ext/admin
   login: admin
