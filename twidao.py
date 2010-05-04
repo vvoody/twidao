@@ -116,5 +116,8 @@ class SettingPage(webapp.RequestHandler):
 class AvatarsHandler(webapp.RequestHandler):
     def get(self, user, size='normal'):
         avatar = models.Avatars.get_by_key_name(user+size)
-        self.response.headers['Content-Type'] = 'image'
-        self.response.out.write(avatar.content)
+        if avatar:
+            self.response.headers['Content-Type'] = 'image'
+            self.response.out.write(avatar.content)
+        else:
+            self.redirect('/notfound')
