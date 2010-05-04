@@ -34,7 +34,6 @@ class SysCounters(db.Model):
     tweets = db.IntegerProperty(default=0)
 
 class Avatars(db.Model):
-    owner = db.StringProperty()
+    origin = db.BlobProperty()
+    bigger = db.BlobProperty()
     normal = db.BlobProperty()
-    small = db.BlobProperty()
-    
