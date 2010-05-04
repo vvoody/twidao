@@ -33,7 +33,6 @@ class SysCounters(db.Model):
     members = db.IntegerProperty(default=0)
     tweets = db.IntegerProperty(default=0)
 
+# key_name -> username+size like 'katenormal'
 class Avatars(db.Model):
-    origin = db.BlobProperty()
-    bigger = db.BlobProperty()
-    normal = db.BlobProperty()
+    content = db.BlobProperty()

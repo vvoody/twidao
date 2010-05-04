@@ -83,10 +83,9 @@ class SettingPage(webapp.RequestHandler):
         u.put()
         #raise db.TransactionFailedError
 
-    def upload_avator(self, avatar):
-        a = models.Avatars(parent=self.user.key(),
-                           key_name=self.user.username,
-                           origin=avatar)
+    def upload_avator(self, avatar, size='origin'):
+        a = models.Avatars(key_name=self.user.username + size,
+                           content=avatar)
         a.put()
 
     def post(self):
@@ -95,6 +94,7 @@ class SettingPage(webapp.RequestHandler):
         avatar = get_form('avatarfile')
         if avatar:
             db.run_in_transaction(self.upload_avator, avatar)
+            # add task compress img
         if self.user.fullname == fullname and self.user.bio == bio:
             self.redirect('/setting')
         try:
@@ -115,7 +115,6 @@ class SettingPage(webapp.RequestHandler):
 # Deal with request like /avatar/john/bigger
 class AvatarsHandler(webapp.RequestHandler):
     def get(self, user, size='normal'):
-        parent = models.Members.get_by_key_name(user).key()
-        avatar = models.Avatars.get_by_key_name(user, parent=parent)
+        avatar = models.Avatars.get_by_key_name(user+size)
         self.response.headers['Content-Type'] = 'image'
-        self.response.out.write(avatar.origin)
+        self.response.out.write(avatar.content)
