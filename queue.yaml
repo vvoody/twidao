@@ -1,0 +1,4 @@
+queue:
+- name: avatar
+  rate: 5/s
+  bucket_size: 10

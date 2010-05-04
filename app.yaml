@@ -16,6 +16,8 @@ handlers:
   upload: static/robots.txt
 - url: /static
   static_dir: static
+#
+# Pages
 - url: /signup
   script: main.py
   login: required
@@ -24,6 +26,12 @@ handlers:
   login: required
 - url: /avatar/.*
   script: main.py
+#
+# Tasks requests -> /task/QUEUE_NAME/ACTION_HANDLER
+- url: /task/avatar/resize
+  script: task.py
+  login: admin
+#
 - url: /admin/.*
   script: $PYTHON_LIB/google/appengine/ext/admin
   login: admin
