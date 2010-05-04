@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+{% block title %}Sign Up{% endblock %}
+{% block body %}
+  <h2>Sign Up</h2>
+  {% if error %}<div class=error><strong>Error:</strong> {{ error }}</div>{% endif %}
+  <form action="/signup" method=post>
+    <dl>
+      <dt>Username(unique & required):
+      <dd><input type="text" name="username" size="20" value="">
+      <dt>Full name(optional):
+      <dd><input type="text" name="fullname" size="20" value="">
+      <dt>Bio(optional):
+      <dd><textarea name="bio" rows="2" vols="30" value=""></textarea>
+    </dl>
+    <div class="actions"><input type="submit" value="Sign Up"></div>
+  </form>
+{% endblock %}

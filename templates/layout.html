@@ -1,0 +1,35 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>{% block title %}Welcome{% endblock %} | Twidao</title>
+<link rel=stylesheet type=text/css href="./static/style.css">
+<div class=page>
+  <h1>Twidao</h1>
+  <div class=navigation>
+  {% if user %}
+    {% if signup %}
+      <a href="/">home</a> |
+      <a href="{{ logout_url }}">sign out</a>
+    {% else %}
+      <a href="/">home</a> |
+      <a href="{{ username }}">profile</a> |
+      <a href="/setting">setting</a> |
+      <a href="{{ logout_url }}">sign out [{{ username }}]</a>
+    {% endif %}
+  {% else %}
+    <a href="/">public timeline</a> |
+    <a href="/signup">sign up</a> |
+    <a href="{{ login_url }}">sign in</a>
+  {% endif %}
+  </div>
+  <ul class=flashes style="display: none;">
+    <li>{{ message }}</li>
+  </ul>
+  <div class=body>
+  {% block body %}{% endblock %}
+  </div>
+  <div class=footer>
+    Twidao &mdash; A Twitter like application on Google App Engine
+  </div>
+</div>
