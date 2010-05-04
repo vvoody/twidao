@@ -2,6 +2,7 @@ from google.appengine.ext import db
 from google.appengine.api import users
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
+from google.appengine.api.labs import taskqueue
 import os
 import models
 
@@ -94,7 +95,10 @@ class SettingPage(webapp.RequestHandler):
         avatar = get_form('avatarfile')
         if avatar:
             db.run_in_transaction(self.upload_avator, avatar)
-            # add task compress img
+            # add task to resize-img queue
+            taskqueue.Task(url='/task/avatar/resize',
+                           params={'username': self.user.username}
+                           ).add(queue_name='avatar')
         if self.user.fullname == fullname and self.user.bio == bio:
             self.redirect('/setting')
         try:
@@ -115,6 +119,8 @@ class SettingPage(webapp.RequestHandler):
 # Deal with request like /avatar/john/bigger
 class AvatarsHandler(webapp.RequestHandler):
     def get(self, user, size='normal'):
+        if size not in ('origin', 'bigger', 'normal'):
+            self.redirect('/notfound')
         avatar = models.Avatars.get_by_key_name(user+size)
         if avatar:
             self.response.headers['Content-Type'] = 'image'
