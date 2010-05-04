@@ -56,3 +56,49 @@ class SignupPage(webapp.RequestHandler):
             self.response.out.write(template.render(path, template_values))
         else:
             self.redirect('/')
+
+class SettingPage(webapp.RequestHandler):
+    def __init__(self):
+        self.cur_user = users.get_current_user()
+        self.user = models.Members.all().filter('user = ', self.cur_user).get()
+
+    def get(self):
+        if not self.user:  # Not registered
+            self.redirect('/signup')
+        logout_url = users.create_logout_url('/')
+        template_values = {'user': 'setting',
+                           'username': self.user.username,
+                           'fullname': self.user.fullname,
+                           'bio': self.user.bio,
+                           'logout_url': logout_url}
+        path = os.path.join(os.path.dirname(__file__), 'templates/setting.html')
+        self.response.out.write(template.render(path, template_values))
+
+    def validator(self, *args):
+        return args
+
+    def update_member(self, fullname, bio):
+        u = models.Members.get_by_key_name(self.user.username)
+        u.fullname, u.bio = fullname, bio
+        u.put()
+        #raise db.TransactionFailedError
+
+    def post(self):
+        get_form = self.request.get
+        fullname, bio = self.validator(get_form('fullname'), get_form('bio'))
+        if self.user.fullname == fullname and self.user.bio == bio:
+            self.redirect('/setting')
+        try:
+            db.run_in_transaction(self.update_member, fullname, bio)
+        except db.TransactionFailedError:
+            logout_url = users.create_logout_url('/')
+            template_values = {'user': 'setting',
+                               'username': self.user.username,
+                               'fullname': self.user.fullname,
+                               'bio': self.user.bio,
+                               'logout_url': logout_url,
+                               'error':"Oops... Try that again."}
+            path = os.path.join(os.path.dirname(__file__), 'templates/setting.html')
+            self.response.out.write(template.render(path, template_values))
+        else:
+            self.redirect('/setting')

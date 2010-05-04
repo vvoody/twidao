@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+{% block title %}Setting{% endblock %}
+{% block body %}
+  <h2>Setting</h2>
+  {% if error %}<div class=error><strong>Error:</strong> {{ error }}</div>{% endif %}
+  <form action="/setting" method=post>
+    <dl>
+      <dt>Username:
+      <dd><input type="text" name="username" size="20" value="{{ username }}" style="background: #eee;" disabled>
+      <dt>Full name:
+      <dd><input type="text" name="fullname" size="20" value="{{ fullname }}">
+      <dt>Bio:
+      <dd><textarea name="bio" rows="2" vols="30">{{ bio }}</textarea>
+    </dl>
+    <div class="actions"><input type="submit" value="Save"></div>
+  </form>
+{% endblock %}
