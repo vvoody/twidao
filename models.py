@@ -4,7 +4,7 @@ class Members(db.Model):
     user = db.UserProperty()        # users.get_current_user()
     username = db.StringProperty()  # unique in this site, immutable(/signup)
     fullname = db.StringProperty()  # editable later(/setting)
-    bio = db.TextProperty()
+    bio = db.StringProperty()
     following = db.StringListProperty(indexed=False)
     followers = db.StringListProperty(indexed=False)
 
