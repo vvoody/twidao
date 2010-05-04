@@ -3,10 +3,13 @@
 {% block body %}
   <h2>Setting</h2>
   {% if error %}<div class=error><strong>Error:</strong> {{ error }}</div>{% endif %}
-  <form action="/setting" method=post>
+  <form action="/setting" method="post" enctype="multipart/form-data">
     <dl>
       <dt>Username:
       <dd><input type="text" name="username" size="20" value="{{ username }}" style="background: #eee;" disabled>
+      <dt>Avatar:
+      <dd><input type="file" name="avatarfile">
+          <br><small>Maximum size of 1M. JPG, GIF, PNG.</small></br>
       <dt>Full name:
       <dd><input type="text" name="fullname" size="20" value="{{ fullname }}">
       <dt>Bio:

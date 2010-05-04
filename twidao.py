@@ -83,9 +83,18 @@ class SettingPage(webapp.RequestHandler):
         u.put()
         #raise db.TransactionFailedError
 
+    def upload_avator(self, avatar):
+        a = models.Avatars(parent=self.user.key(),
+                           key_name=self.user.username,
+                           origin=avatar)
+        a.put()
+
     def post(self):
         get_form = self.request.get
         fullname, bio = self.validator(get_form('fullname'), get_form('bio'))
+        avatar = get_form('avatarfile')
+        if avatar:
+            db.run_in_transaction(self.upload_avator, avatar)
         if self.user.fullname == fullname and self.user.bio == bio:
             self.redirect('/setting')
         try:
