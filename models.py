@@ -7,13 +7,9 @@ class Members(db.Model):
     bio = db.StringProperty()
     following = db.StringListProperty(indexed=False)
     followers = db.StringListProperty(indexed=False)
-
-class Counters(db.Model):
-    user = db.ReferenceProperty(Members, collection_name = 'counters')
-    tweets = db.IntegerProperty(default=0)
-    following = db.IntegerProperty(default=0)
-    followers = db.IntegerProperty(default=0)
-    favorites = db.IntegerProperty(default=0)
+    tweets_counter = db.IntegerProperty(default=0)
+    following_counter = db.IntegerProperty(default=0)
+    followers_counter = db.IntegerProperty(default=0)
 
 class Tweets(db.Model):
     content = db.TextProperty()
@@ -31,8 +27,7 @@ class Favorites(db.Model):
     tweet = db.ReferenceProperty(Tweets)
 
 class SysCounters(db.Model):
-    members = db.IntegerProperty(default=0)
-    tweets = db.IntegerProperty(default=0)
+    counter = db.IntegerProperty(default=0)
 
 # key_name -> username+size like 'katenormal'
 class Avatars(db.Model):
