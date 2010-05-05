@@ -27,19 +27,28 @@ class SignupPage(webapp.RequestHandler):
         return args
 
     def register_member(self, username, fullname, bio):
-        obj = db.get(db.Key.from_path("Members", username.lower()))
-        if not obj:
-            obj = models.Members(key_name=username.lower(),  # unique and lower case
-                                     user=self.cur_user,
-                                     username=username,
-                                     fullname=fullname,
-                                     bio=bio,
-                                     following=[],
-                                     followers=[])
-        else:
-            # Username existed
-            raise db.TransactionFailedError
-        obj.put()
+        def store_to_Members(username, fullname, bio):
+            obj = db.get(db.Key.from_path("Members", username.lower()))
+            if not obj:
+                obj = models.Members(key_name=username.lower(),  # unique and lower case
+                                         user=self.cur_user,
+                                         username=username,
+                                         fullname=fullname,
+                                         bio=bio,
+                                         following=[],
+                                         followers=[])
+            else:
+                # Username existed
+                raise db.TransactionFailedError
+            obj.put()
+            return obj.key()
+        #
+        def connect_with_Counters(ancestor, username):
+            counter = models.Counters(parent=ancestor, key_name=username.lower()+'counters')
+            counter.put()
+        #
+        ancestor = db.run_in_transaction(store_to_Members, username, fullname, bio)
+        db.run_in_transaction(connect_with_Counters, ancestor, username)
 
     def post(self):
         get_form = self.request.get
@@ -47,7 +56,7 @@ class SignupPage(webapp.RequestHandler):
                                                  get_form('fullname'),
                                                  get_form('bio'))
         try:
-            db.run_in_transaction(self.register_member, username, fullname, bio)
+           self.register_member(username, fullname, bio)
         except db.TransactionFailedError:
             template_values = {'error':
                                "Username '%s' has been taken!" % username}

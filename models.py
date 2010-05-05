@@ -7,10 +7,8 @@ class Members(db.Model):
     bio = db.StringProperty()
     following = db.StringListProperty(indexed=False)
     followers = db.StringListProperty(indexed=False)
-    tweets_counter = db.IntegerProperty(default=0)
-    following_counter = db.IntegerProperty(default=0)
-    followers_counter = db.IntegerProperty(default=0)
 
+# ancestor(Members)
 class Tweets(db.Model):
     content = db.TextProperty()
     bywho = db.StringProperty()
@@ -18,14 +16,24 @@ class Tweets(db.Model):
     reply_to_tweet = db.IntegerProperty()
     reply_to = db.StringProperty()
 
+# ancestor(Members)
+class Counters(db.Model):
+    tweets_counter = db.IntegerProperty(default=0)
+    favorites_counter = db.IntegerProperty(default=0)
+    following_counter = db.IntegerProperty(default=0)
+    followers_counter = db.IntegerProperty(default=0)
+
+# ancestor(Members)
 class Replies(db.Model):
     # t = Replies(parent=some_user.key(), tweet = some_tweet.key())
     tweet = db.ReferenceProperty(Tweets)
 
+# ancestor(Members)
 class Favorites(db.Model):
     # f = Favorites(parent=some_user.key(), tweet = some_tweet.key())
     tweet = db.ReferenceProperty(Tweets)
 
+# auto increment_counter of tweet id
 class SysCounters(db.Model):
     counter = db.IntegerProperty(default=0)
 
