@@ -24,7 +24,31 @@ class ResizeAvatar(webapp.RequestHandler):
             #self.response.headers['Content-Type'] = 'image'
             #self.response.out.write(avatar_origin.content)
 
+class PushTimeline(webapp.RequestHandler):
+    """Push the new tweet just posted to followers' timeline queue
+    """
+    def get(self):
+        tid = int(self.request.get('tid'))
+        tuser = self.request.get('user').lower()
+        ancestor = models.Members.get_by_key_name(tuser)
+        tweet = models.Tweets.get_by_id(tid, ancestor)
+        #self.response.out.write("%s" % tweet.content)
+        if not tweet:
+            pass
+        else:
+            #self.response.out.write("%s" % followers)
+            followers = ancestor.followers  # unicode object
+            for follower in followers:
+                ancestor = models.Members.get_by_key_name(str(follower))
+                models.TimelineQueue(parent=ancestor,
+                                     tweet = tweet.key(),
+                                     bywho = tuser,
+                                     when  = tweet.when,
+                                     ).put()
+            # end
+
 application = webapp.WSGIApplication([('/task/avatar/resize', ResizeAvatar),
+                                      ('/task/tweets/push_timeline', PushTimeline),
                                       ], debug=True)
 
 def main():

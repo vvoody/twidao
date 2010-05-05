@@ -71,6 +71,7 @@ class MainPage(webapp.RequestHandler):
         tid = get_new_tweet_id()
         ancestor = self.user.key()
         db.run_in_transaction(txn, tid, ancestor, content, bywho, reply_to_tweet, reply_to)
+        return tid
 
     def validator(self, *args):
         return (args[0], None, None)
@@ -87,12 +88,17 @@ class MainPage(webapp.RequestHandler):
         # 2. Counters
         # 3.1 TimelineQueue, ancestor(self)
         # 1, 2 & 3.1 in the same transaction(cuz of same entity group / ancestor)
-        self.store_tweet(tweet_content,
-                         self.user.username.lower(),
-                         reply_to_tweet,
-                         reply_to)
-        #
+        username = self.user.username.lower()
+        tid = self.store_tweet(tweet_content,
+                               username,
+                               reply_to_tweet,
+                               reply_to)
         # 3.2 TimelineQueue, ancestor(followers) -> taskqueue
+        # push the new tweet to followers' timeline queue
+        taskqueue.Task(url='/task/tweets/push_timeline?tid=%d&user=%s' %
+                       (tid, username),
+                       method='GET',
+                       ).add(queue_name='tweets')
         # 4. replies -> Replies(taskqueue)
 
 # login: required

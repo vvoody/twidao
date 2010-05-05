@@ -2,3 +2,6 @@ queue:
 - name: avatar
   rate: 5/s
   bucket_size: 10
+- name: tweets
+  rate: 5/s
+  bucket_size: 10
