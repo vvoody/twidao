@@ -10,12 +10,10 @@ import models
 class SignupPage(webapp.RequestHandler):
     def __init__(self):
         self.cur_user = users.get_current_user()
+        self.user = models.Members.all().filter('user', self.cur_user).get()
 
     def get(self):
-        q = models.Members.all()
-        q.filter('user = ', self.cur_user)
-        user = q.get()
-        if user :  # registered (and same Google Account)
+        if self.user :  # registered (and same Google Account)
             self.redirect('/')
         logout_url = users.create_logout_url('/')
         template_values = {'user': 'signup',
@@ -29,15 +27,15 @@ class SignupPage(webapp.RequestHandler):
         return args
 
     def register_member(self, username, fullname, bio):
-        obj = db.get(db.Key.from_path("Members", username))
+        obj = db.get(db.Key.from_path("Members", username.lower()))
         if not obj:
-            obj = models.Members(key_name=username,
-                                 user=self.cur_user,
-                                 username=username,
-                                 fullname=fullname,
-                                 bio=bio,
-                                 following=[],
-                                 followers=[])
+            obj = models.Members(key_name=username.lower(),  # unique and lower case
+                                     user=self.cur_user,
+                                     username=username,
+                                     fullname=fullname,
+                                     bio=bio,
+                                     following=[],
+                                     followers=[])
         else:
             # Username existed
             raise db.TransactionFailedError
