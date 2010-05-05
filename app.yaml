@@ -18,6 +18,8 @@ handlers:
   static_dir: static
 #
 # Pages
+- url: /
+  script: main.py
 - url: /signup
   script: main.py
   login: required

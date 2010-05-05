@@ -6,6 +6,85 @@ from google.appengine.api.labs import taskqueue
 import os
 import models
 
+def increment_counter(counter_name, amount):
+    obj = models.SysCounters.get_by_key_name(counter_name)
+    obj.counter += amount
+    obj.put()
+    return obj.counter
+
+def get_new_tweet_id():
+    return int(db.run_in_transaction(increment_counter, 'tweet_id', 1))
+
+class MainPage(webapp.RequestHandler):
+    def __init__(self):
+        self.cur_user = users.get_current_user()
+        self.user = models.Members.all().filter('user', self.cur_user).get()
+        self.template_values = {}
+
+    def render_page(self):
+        path = os.path.join(os.path.dirname(__file__), 'templates/main.html')
+        self.response.out.write(template.render(path, self.template_values))
+
+    def show_public_timeline(self):
+        # fetch Tweets
+        self.template_values = {'login_url': users.create_login_url('/'),
+                                'pagetype': 'public timeline',
+                                }
+        self.render_page()
+        #self.response.out.write("Public timeline...")
+
+    def get(self):
+        if not self.cur_user:
+            self.show_public_timeline()
+        elif not self.user:
+            self.redirect('/signup')
+        else:
+            logout_url = users.create_logout_url('/')
+            self.template_values = {'user': self.user,
+                                    'logout_url': logout_url,
+                                    'pagetype': 'my timeline',
+                                    }
+            self.render_page()
+
+    def store_tweet(self, content, bywho, reply_to_tweet, reply_to):
+        def txn(tid, ancestor, content, bywho, reply_to_tweet, reply_to):
+            tkey = db.Key.from_path("Members", bywho, 'Tweets', tid)
+            models.Tweets(key=tkey,
+                          content = content,
+                          bywho = bywho,
+                          reply_to_tweet = reply_to_tweet,
+                          reply_to = reply_to,
+                          ).put()
+            counter = models.Counters.all().ancestor(ancestor).get()
+            counter.tweets_counter += 1
+            counter.put()
+        #
+        tid = get_new_tweet_id()
+        ancestor = self.user.key()
+        db.run_in_transaction(txn, tid, ancestor, content, bywho, reply_to_tweet, reply_to)
+
+    def validator(self, *args):
+        return (args[0], None, None)
+
+    def post(self):
+        if not self.user:
+            self.error(401)
+        self.response.out.write("%s" % (self.request.get('tweet')))
+        tweet_content, reply_to_tweet, reply_to = self.validator(
+            self.request.get('tweet'),
+            self.request.get('reply_to_tweet'),
+            self.request.get('reply_to'))
+        # 1. get unique id & store in Tweets(with ancestor)
+        # 2. Counters
+        # 1 & 2 in the same transaction
+        self.store_tweet(tweet_content,
+                         self.user.username.lower(),
+                         reply_to_tweet,
+                         reply_to)
+        # 3.1 TimelineQueue, ancestor(self)
+        # 3.2 TimelineQueue, ancestor(followers) -> taskqueue
+        # 4. replies -> Replies(taskqueue)
+
 # login: required
 class SignupPage(webapp.RequestHandler):
     def __init__(self):

@@ -5,11 +5,7 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext.webapp import template
 import os
 import models
-from twidao import SignupPage, SettingPage, AvatarsHandler
-
-class MainPage(webapp.RequestHandler):
-    def get(self):
-        self.response.out.write("Hello world!")
+from twidao import MainPage, SignupPage, SettingPage, AvatarsHandler
 
 application = webapp.WSGIApplication([('/', MainPage),
                                       ('/signup', SignupPage),
