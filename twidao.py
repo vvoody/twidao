@@ -65,6 +65,8 @@ class MainPage(webapp.RequestHandler):
             counter.put()
             # add this tweet to the TimelineQueue immediately
             models.TimelineQueue(parent=ancestor,
+                                 tweet= tkey,
+                                 bywho= bywho,
                                  when=now,
                                  ).put()
         #
