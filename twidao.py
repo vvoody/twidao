@@ -66,14 +66,15 @@ class SettingPage(webapp.RequestHandler):
     def get(self):
         if not self.user:  # Not registered
             self.redirect('/signup')
-        logout_url = users.create_logout_url('/')
-        template_values = {'user': 'setting',
-                           'username': self.user.username,
-                           'fullname': self.user.fullname,
-                           'bio': self.user.bio,
-                           'logout_url': logout_url}
-        path = os.path.join(os.path.dirname(__file__), 'templates/setting.html')
-        self.response.out.write(template.render(path, template_values))
+        else:
+            logout_url = users.create_logout_url('/')
+            template_values = {'user': 'setting',
+                               'username': self.user.username,
+                               'fullname': self.user.fullname,
+                               'bio': self.user.bio,
+                               'logout_url': logout_url}
+            path = os.path.join(os.path.dirname(__file__), 'templates/setting.html')
+            self.response.out.write(template.render(path, template_values))
 
     def validator(self, *args):
         return args
