@@ -126,5 +126,8 @@ class AvatarsHandler(webapp.RequestHandler):
         if avatar:
             self.response.headers['Content-Type'] = 'image'
             self.response.out.write(avatar.content)
+        # registered but not upload avatar yet
+        elif models.Members.get_by_key_name(user):
+            self.redirect('/static/default_avatar_%s.png' % size)
         else:
             self.redirect('/notfound')
