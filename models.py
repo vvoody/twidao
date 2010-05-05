@@ -10,7 +10,7 @@ class Members(db.Model):
 
 # ancestor(Members)
 class Tweets(db.Model):
-    content = db.TextProperty()
+    content = db.StringProperty()
     bywho = db.StringProperty()
     when = db.DateTimeProperty(auto_now_add=True)
     reply_to_tweet = db.IntegerProperty()
