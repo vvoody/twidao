@@ -20,6 +20,7 @@ class Tweets(db.Model):
     bywho = db.StringProperty()
     when = db.DateTimeProperty(auto_now_add=True)
     reply_to_tweet = db.IntegerProperty()
+    reply_to = db.StringProperty()
 
 class Replies(db.Model):
     # t = Replies(parent=some_user.key(), tweet = some_tweet.key())
