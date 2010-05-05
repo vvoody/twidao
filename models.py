@@ -33,6 +33,18 @@ class Favorites(db.Model):
     # f = Favorites(parent=some_user.key(), tweet = some_tweet.key())
     tweet = db.ReferenceProperty(Tweets)
 
+# ancestor(Members)
+# GET my timeline:
+# TimelineQueue.all().ancestor(user).filter('active', True).order('-when')
+# UNFOLLOW someone
+# TimelineQueue.all().ancestor(user).filter('bywho', sb_unfollowed).active = False
+class TimelineQueue(db.Model):
+    tweet = db.ReferenceProperty(Tweets)
+    bywho = db.StringProperty()
+    active = db.BooleanProperty(default=True)  # remove from timeline
+    faved = db.BooleanProperty(default=False)
+    when  = db.DateTimeProperty()
+
 # auto increment_counter of tweet id
 class SysCounters(db.Model):
     counter = db.IntegerProperty(default=0)
