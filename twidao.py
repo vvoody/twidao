@@ -5,6 +5,7 @@ from google.appengine.ext.webapp import template
 from google.appengine.api.labs import taskqueue
 import os
 import models
+from datetime import datetime
 
 def increment_counter(counter_name, amount):
     obj = models.SysCounters.get_by_key_name(counter_name)
@@ -48,16 +49,24 @@ class MainPage(webapp.RequestHandler):
 
     def store_tweet(self, content, bywho, reply_to_tweet, reply_to):
         def txn(tid, ancestor, content, bywho, reply_to_tweet, reply_to):
+            # store the new tweet
+            now = datetime.now()
             tkey = db.Key.from_path("Members", bywho, 'Tweets', tid)
             models.Tweets(key=tkey,
                           content = content,
                           bywho = bywho,
+                          when = now,
                           reply_to_tweet = reply_to_tweet,
                           reply_to = reply_to,
                           ).put()
+            # increment tweets counter
             counter = models.Counters.all().ancestor(ancestor).get()
             counter.tweets_counter += 1
             counter.put()
+            # add this tweet to the TimelineQueue immediately
+            models.TimelineQueue(parent=ancestor,
+                                 when=now,
+                                 ).put()
         #
         tid = get_new_tweet_id()
         ancestor = self.user.key()
@@ -76,12 +85,13 @@ class MainPage(webapp.RequestHandler):
             self.request.get('reply_to'))
         # 1. get unique id & store in Tweets(with ancestor)
         # 2. Counters
-        # 1 & 2 in the same transaction
+        # 3.1 TimelineQueue, ancestor(self)
+        # 1, 2 & 3.1 in the same transaction(cuz of same entity group / ancestor)
         self.store_tweet(tweet_content,
                          self.user.username.lower(),
                          reply_to_tweet,
                          reply_to)
-        # 3.1 TimelineQueue, ancestor(self)
+        #
         # 3.2 TimelineQueue, ancestor(followers) -> taskqueue
         # 4. replies -> Replies(taskqueue)
 
