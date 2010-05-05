@@ -101,7 +101,11 @@ class MainPage(webapp.RequestHandler):
                        (tid, username),
                        method='GET',
                        ).add(queue_name='tweets')
-        # 4. replies -> Replies(taskqueue)
+        # 4. replies & find out the mentions of this tweet
+        taskqueue.Task(url='/task/tweets/replies?tid=%d&user=%s' % (tid, username),
+                       method='GET',
+                       ).add(queue_name='tweets')
+        # End of MainPage
 
 # login: required
 class SignupPage(webapp.RequestHandler):

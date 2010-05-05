@@ -3,6 +3,7 @@ from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.api import images
 import models
+import re
 
 class ResizeAvatar(webapp.RequestHandler):
     """Resize the avatar image file uploaded to smaller and much smaller size.
@@ -47,8 +48,51 @@ class PushTimeline(webapp.RequestHandler):
                                      ).put()
             # end
 
+class RepliesHandler(webapp.RequestHandler):
+    """Check whether tweet's reply_to_tweet & reply_to field are corrent or not,
+    and find out who mentioned from the tweet.
+    """
+    def validate_reply_to(self, origin_tweet, reply_to_tweet_id, reply_to):
+        ancestor = models.Members.get_by_key_name(reply_to)
+        reply_to_tweet = models.Tweets.get_by_id(reply_to_tweet_id, ancestor)
+        if origin_tweet.content.split(' ')[0][0] == '@':
+            if origin_tweet.content.split(' ')[0][1:].lower() == reply_to_tweet.bywho:
+                if reply_to_tweet.bywho == origin_tweet.reply_to:
+                    return
+                else:
+                    origin_tweet.reply_to = reply_to_tweet.bywho
+                    origin_tweet.put()
+                    return
+        origin_tweet.reply_to_tweet = None
+        origin_tweet.reply_to = None
+        origin_tweet.put()
+
+    def findout_mentions(self, tweet):
+        mention = map(lambda x: x.lower(),
+                    re.findall(r'@([a-zA-Z0-9]*)', tweet.content))
+        # push into Replies & TimelineQueue
+        # RT @Rabit: I love you! (not a @Test) ^_^
+        for user in mention:
+            ancestor = models.Members.get_by_key_name(user)
+            if ancestor:
+                models.Replies(parent=ancestor, tweet=tweet).put()
+        # End
+
+    def get(self):
+        tid = int(self.request.get('tid'))
+        tuser = self.request.get('user').lower()
+        ancestor = models.Members.get_by_key_name(tuser)
+        tweet = models.Tweets.get_by_id(tid, ancestor)
+        if tweet.reply_to_tweet != None:
+            self.validate_reply_to(tweet, tweet.reply_to_tweet, reply_to)
+        elif tweet.reply_to != None:  # reply to unknown tweet
+            tweet.reply_to = None
+            tweet.put()
+        self.findout_mentions(tweet)
+
 application = webapp.WSGIApplication([('/task/avatar/resize', ResizeAvatar),
                                       ('/task/tweets/push_timeline', PushTimeline),
+                                      ('/task/tweets/replies', RepliesHandler),
                                       ], debug=True)
 
 def main():

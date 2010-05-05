@@ -36,6 +36,9 @@ handlers:
 - url: /task/tweets/push_timeline
   script: task.py
   login: admin
+- url: /task/tweets/replies
+  script: task.py
+  login: admin
 #
 - url: /admin/.*
   script: $PYTHON_LIB/google/appengine/ext/admin
