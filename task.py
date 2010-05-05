@@ -41,11 +41,12 @@ class PushTimeline(webapp.RequestHandler):
             followers = ancestor.followers  # unicode object
             for follower in followers:
                 ancestor = models.Members.get_by_key_name(str(follower))
-                models.TimelineQueue(parent=ancestor,
-                                     tweet = tweet.key(),
-                                     bywho = tuser,
-                                     when  = tweet.when,
-                                     ).put()
+                if tweet.reply_to == None or tweet.reply_to in ancestor.following:
+                    models.TimelineQueue(parent=ancestor,
+                                         tweet = tweet.key(),
+                                         bywho = tuser,
+                                         when  = tweet.when,
+                                         ).put()
             # end
 
 class RepliesHandler(webapp.RequestHandler):
