@@ -60,9 +60,11 @@
   {% if user %}
     <img class="action" src="static/del.png" alt="del" />
     <img class="action" src="static/unfaved.png" alt="fav" />
+    {%if not page_user %}
     <img class="action" src="static/retweet.png" alt="retweet" />
     <img class="action" src="static/rt.png" alt="rt" />
     <img class="action" src="static/reply.png" alt="reply" />
+    {% endif %}
   {% endif %}
  {% endfor %}
   </ul>
