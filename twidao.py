@@ -26,24 +26,43 @@ class MainPage(webapp.RequestHandler):
         path = os.path.join(os.path.dirname(__file__), 'templates/main.html')
         self.response.out.write(template.render(path, self.template_values))
 
-    def show_public_timeline(self):
+    def show_public_timeline(self, next_page):
         # fetch Tweets
+        q = models.Tweets.all().order('-when')
+        if next_page:
+            q.with_cursor(next_page)
+        # Fetch next 20 tweets
+        tweets = q.fetch(20)
+        # Store the latest cursor for the next request.
+        next_page = q.cursor()
         self.template_values = {'login_url': users.create_login_url('/'),
                                 'pagetype': 'public timeline',
+                                'tweets': tweets,
+                                'page_size': len(tweets),
+                                'next_page': next_page,
                                 }
         self.render_page()
         #self.response.out.write("Public timeline...")
 
     def get(self):
+        next_page = self.request.get('next_page')
         if not self.cur_user:
-            self.show_public_timeline()
+            self.show_public_timeline(next_page)
         elif not self.user:
             self.redirect('/signup')
         else:
+            q = models.TimelineQueue.all().ancestor(self.user.key()).filter('active', True).order('-when')
+            if next_page:
+                q.with_cursor(next_page)
+            tweets = q.fetch(20)
+            next_page = q.cursor()
             logout_url = users.create_logout_url('/')
             self.template_values = {'user': self.user,
                                     'logout_url': logout_url,
                                     'pagetype': 'my timeline',
+                                    'tweets': tweets,
+                                    'page_size': len(tweets),
+                                    'next_page': next_page,
                                     }
             self.render_page()
 

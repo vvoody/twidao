@@ -13,9 +13,9 @@
       <a href="{{ logout_url }}">sign out</a>
     {% else %}
       <a href="/">home</a> |
-      <a href="{{ username }}">profile</a> |
+      <a href="{{ user.username }}">profile</a> |
       <a href="/setting">setting</a> |
-      <a href="{{ logout_url }}">sign out [{{ username }}]</a>
+      <a href="{{ logout_url }}">sign out [{{ user.username }}]</a>
     {% endif %}
   {% else %}
     <a href="/">public timeline</a> |

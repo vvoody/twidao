@@ -1,0 +1,71 @@
+{% extends "layout.html" %}
+{% block title %}
+  {% ifequal pagetype 'public timeline' %}
+    Public Timeline
+  {% endifequal %}
+  {% ifequal pagetype 'user timeline' %}
+    {{ user.username }}'s Timeline
+  {% endifequal %}
+  {% ifequal pagetype 'my timeline' %}
+    My Timeline
+  {% endifequal %}
+{% endblock %}
+
+{% block body %}
+  <h2>{{ pagetype|title  }}</h2>
+
+  {% if user %}
+    {% ifequal pagetype 'user timeline' %}
+      <div class=followstatus>
+      {% ifequal user.username 'TTTTT' %}
+        This is you!
+      {% endifequal %}
+      {% if followed %}
+        You are currently following this user.
+        <a class=unfollow href="/unfollow/">Unfollow user</a>.
+      {% else %}
+        You are not yet following this user.
+        <a class=follow href="/follow">Follow user</a>.
+      {% endif %}
+      </div>
+    {% endifequal %}
+    {% ifequal pagetype 'my timeline' %}
+      <div class=twitbox>
+        <h3>What's on your mind {{ user.username }}?</h3>
+        <form action="/" method=post>
+          <p><input type="text" name="tweet" size=60><!--
+          --><input type="submit" value="Say it!">
+        </form>
+      </div>
+    {% endifequal %}
+  {% endif %}
+
+<!-- tweets body -->
+  <ul class=messages>
+ {% for tweet in tweets %}
+    <li><img class="avatar" src="/avatar/{{ tweet.bywho }}"><p>
+      <strong><a href="/{{ tweet.bywho }}">{{ tweet.bywho }}</a></strong>
+      {{ tweet.content|escape }}
+<!---->
+<br><br>
+<small align="left">
+&mdash; <a href="/status/{{ tweet.key.id }}" style="color: #888;">
+    {{ tweet.when|timesince }} ago</a>
+</small>
+  {% if user %}
+    <img class="action" src="static/del.png" alt="del" />
+    <img class="action" src="static/unfaved.png" alt="fav" />
+    <img class="action" src="static/retweet.png" alt="retweet" />
+    <img class="action" src="static/rt.png" alt="rt" />
+    <img class="action" src="static/reply.png" alt="reply" />
+  {% endif %}
+ {% endfor %}
+  </ul>
+
+<div style="float: right;">
+<a href="javascript:history.go(-1);">Previous</a>&nbsp;
+{% ifequal page_size 20 %}
+<a href="/?next_page={{ next_page }}">Next</a>
+{% endifequal %}
+</div><br />
+{% endblock %}
