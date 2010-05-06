@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+{% block title %}{{ tweet.bywho }}: {{ tweet.content|truncatewords:20 }}{% endblock %}
+{% block body %}
+
+  <ul class=messages>
+    <li><img class="avatar" src="/avatar/{{ tweet.bywho }}"><p>
+      <strong><a href="/{{ tweet.bywho }}">{{ tweet.bywho }}</a></strong>
+      {{ tweet.content|escape }}
+<br><br>
+<small align="left">
+&mdash; <a href="/status/{{ tweet.bywho }}/{{ tweet.key.id }}" style="color: #888;">
+    {{ tweet.when|timesince }} ago</a>
+</small>
+  {% if user %}
+    {% ifequal user.username|lower tweet.bywho|lower %}
+      <img class="action" src="/static/del.png" alt="del" />
+    {% endifequal %}
+    {% ifnotequal user.username|lower tweet.bywho|lower %}
+      <img class="action" src="/static/retweet.png" alt="retweet" />
+      <img class="action" src="/static/rt.png" alt="rt" />
+      <img class="action" src="/static/reply.png" alt="reply" />
+    {% endifnotequal %}
+  {% endif %}
+
+{% endblock %}

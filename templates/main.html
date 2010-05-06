@@ -54,7 +54,7 @@
 <!---->
 <br><br>
 <small align="left">
-&mdash; <a href="/status/{{ tweet.key.id }}" style="color: #888;">
+&mdash; <a href="/status/{{ tweet.bywho }}/{{ tweet.key.id }}" style="color: #888;">
     {{ tweet.when|timesince }} ago</a>
 </small>
   {% if user %}

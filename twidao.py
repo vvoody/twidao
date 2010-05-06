@@ -296,3 +296,22 @@ class UserPage(webapp.RequestHandler):
             self.redirect('/notfound')
         else:
             self.show_user_timeline(page_user, self.request.get('next_page'))
+        # End UserPage
+
+class StatusPage(webapp.RequestHandler):
+    def get(self, username, tweet_id):
+        tuser = models.Members.get_by_key_name(username.lower())
+        tweet = models.Tweets.get_by_id(int(tweet_id), parent=tuser.key())
+        if not tweet:
+            self.redirect('/notfound')
+        else:
+            cur_user = users.get_current_user()
+            login_user = models.Members.all().filter('user', cur_user).get()
+            login_url = users.create_login_url('/')
+            logout_url = users.create_logout_url('/')
+            template_values = {'user': login_user,
+                               'logout_url': logout_url, 'login_url': login_url,
+                               'tweet': tweet,
+                               }
+            path = os.path.join(os.path.dirname(__file__), 'templates/status.html')
+            self.response.out.write(template.render(path, template_values))

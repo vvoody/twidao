@@ -30,6 +30,8 @@ handlers:
   script: main.py
 - url: /notfound
   script: main.py
+- url: /status/.*
+  script: main.py
 - url: /(\w+)
   script: main.py
 #
