@@ -16,6 +16,11 @@ def increment_counter(counter_name, amount):
 def get_new_tweet_id():
     return int(db.run_in_transaction(increment_counter, 'tweet_id', 1))
 
+class NotFoundPage(webapp.RequestHandler):
+    def get(self):
+        path = os.path.join(os.path.dirname(__file__), 'templates/notfound.html')
+        self.response.out.write(template.render(path, {'notfound': 'notfound'}))
+
 class MainPage(webapp.RequestHandler):
     def __init__(self):
         self.cur_user = users.get_current_user()

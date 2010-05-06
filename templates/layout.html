@@ -18,9 +18,11 @@
       <a href="{{ logout_url }}">sign out [{{ user.username }}]</a>
     {% endif %}
   {% else %}
-    <a href="/">public timeline</a> |
-    <a href="/signup">sign up</a> |
-    <a href="{{ login_url }}">sign in</a>
+    {% if not notfound %}
+      <a href="/">public timeline</a> |
+      <a href="/signup">sign up</a> |
+      <a href="{{ login_url }}">sign in</a>
+    {% endif %}
   {% endif %}
   </div>
   {% if flashes %}

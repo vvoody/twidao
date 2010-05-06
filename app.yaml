@@ -28,6 +28,8 @@ handlers:
   login: required
 - url: /avatar/.*
   script: main.py
+- url: /notfound
+  script: main.py
 #
 # Tasks requests -> /task/QUEUE_NAME/ACTION_HANDLER
 - url: /task/avatar/resize
