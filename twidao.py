@@ -59,7 +59,8 @@ class MainPage(webapp.RequestHandler):
             q = models.TimelineQueue.all().ancestor(self.user.key()).filter('active', True).order('-when')
             if next_page:
                 q.with_cursor(next_page)
-            tweets = q.fetch(20)
+            res = q.fetch(20)
+            tweets = db.get(map(lambda x: x.tweet.key(), res))
             next_page = q.cursor()
             logout_url = users.create_logout_url('/')
             self.template_values = {'user': self.user,
