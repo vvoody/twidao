@@ -5,14 +5,15 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext.webapp import template
 import os
 import models
-from twidao import MainPage, SignupPage, SettingPage, AvatarsHandler, NotFoundPage
+from twidao import MainPage, SignupPage, SettingPage, AvatarsHandler, NotFoundPage, UserPage
 
 application = webapp.WSGIApplication([('/', MainPage),
                                       ('/signup', SignupPage),
                                       ('/setting', SettingPage),
                                       ('/avatar/([^/]*)', AvatarsHandler),
                                       ('/avatar/(.*)/(.*)', AvatarsHandler),
-                                      ('/notfound', NotFoundPage)], debug=True)
+                                      ('/notfound', NotFoundPage),
+                                      ('/(\w+)', UserPage)], debug=True)
 
 def main():
     run_wsgi_app(application)

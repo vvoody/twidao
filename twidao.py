@@ -263,3 +263,35 @@ class AvatarsHandler(webapp.RequestHandler):
             self.redirect('/static/default_avatar_%s.png' % size)
         else:
             self.redirect('/notfound')
+
+# User page & their timeline
+class UserPage(webapp.RequestHandler):
+    def show_user_timeline(self, page_user, next_page):
+        cur_user = users.get_current_user()
+        user = models.Members.all().filter('user', cur_user).get()
+        q = models.Tweets.all().ancestor(page_user.key()).order('-when')
+        if next_page:
+            q.with_cursor(next_page)
+        tweets = q.fetch(20)
+        next_page = q.cursor()
+        followed = None
+        if user:
+            followed = True if page_user.username.lower() in user.following else \
+                       False
+        login_url = users.create_login_url('/')
+        logout_url = users.create_logout_url('/')
+        template_values = {'user': user, 'page_user': page_user,
+                           'pagetype': 'user timeline',
+                           'logout_url': logout_url, 'login_url': login_url,
+                           'tweets': tweets,'followed': followed,
+                           'page_size': len(tweets),'next_page': next_page,
+                           }
+        path = os.path.join(os.path.dirname(__file__), 'templates/main.html')
+        self.response.out.write(template.render(path, template_values))
+
+    def get(self, username):
+        page_user = models.Members.get_by_key_name(username.lower())
+        if not page_user:
+            self.redirect('/notfound')
+        else:
+            self.show_user_timeline(page_user, self.request.get('next_page'))

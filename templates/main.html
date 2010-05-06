@@ -4,7 +4,7 @@
     Public Timeline
   {% endifequal %}
   {% ifequal pagetype 'user timeline' %}
-    {{ user.username }}'s Timeline
+    {{ page_user.username }}'s Timeline
   {% endifequal %}
   {% ifequal pagetype 'my timeline' %}
     My Timeline
@@ -12,21 +12,26 @@
 {% endblock %}
 
 {% block body %}
-  <h2>{{ pagetype|title  }}</h2>
-
+  {% if page_user %}
+    <h2>{{ page_user.username }}'s Timeline</h2>
+  {% else %}
+    <h2>{{ pagetype|title  }}</h2>
+  {% endif %}
   {% if user %}
     {% ifequal pagetype 'user timeline' %}
       <div class=followstatus>
-      {% ifequal user.username 'TTTTT' %}
+      {% ifequal user.username page_user.username %}
         This is you!
       {% endifequal %}
-      {% if followed %}
-        You are currently following this user.
-        <a class=unfollow href="/unfollow/">Unfollow user</a>.
-      {% else %}
-        You are not yet following this user.
-        <a class=follow href="/follow">Follow user</a>.
-      {% endif %}
+      {% ifnotequal user.username page_user.username %}
+        {% if followed %}
+          You are currently following this user.
+          <a class=unfollow href="/unfollow/{{ page_user.username }}">Unfollow user</a>.
+        {% else %}
+          You are not yet following this user.
+          <a class=follow href="/follow/{{ page_user.username }}">Follow user</a>.
+        {% endif %}
+      {% endifnotequal %}
       </div>
     {% endifequal %}
     {% ifequal pagetype 'my timeline' %}
