@@ -201,7 +201,7 @@ class SettingPage(webapp.RequestHandler):
             self.redirect('/signup')
         else:
             logout_url = users.create_logout_url('/')
-            template_values = {'user': 'setting',
+            template_values = {'user': self.user,
                                'username': self.user.username,
                                'fullname': self.user.fullname,
                                'bio': self.user.bio,
