@@ -7,9 +7,11 @@
     <dl>
       <dt>Username:
       <dd><input type="text" name="username" size="20" value="{{ username }}" style="background: #eee;" disabled>
-      <dt>Avatar:
-      <dd><input type="file" name="avatarfile"><img src="/avatar/{{ username }}" />
+        <p></p>
+      <dt>Avatar:&nbsp;&nbsp;<img src="/avatar/{{ username }}/bigger" />
+      <dd><input type="file" name="avatarfile">
           <br><small>Maximum size of 1M. JPG, GIF, PNG.</small></br>
+        <br />
       <dt>Full name:
       <dd><input type="text" name="fullname" size="20" value="{{ fullname }}">
       <dt>Bio:
