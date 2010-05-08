@@ -189,3 +189,7 @@ div.error {
     padding: 4px;
     font-size: 13px;
 }
+
+.notfound {
+    text-align: center;
+}
