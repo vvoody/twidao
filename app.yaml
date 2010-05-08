@@ -48,6 +48,9 @@ handlers:
 - url: /fav/.*
   script: main.py
   login: required
+- url: /unfav/.*
+  script: main.py
+  login: required
 #
 # Tasks requests -> /task/QUEUE_NAME/ACTION_HANDLER
 - url: /task/avatar/resize

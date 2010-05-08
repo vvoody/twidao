@@ -83,6 +83,7 @@ class MainPage(webapp.RequestHandler):
                           when = now,
                           reply_to_tweet = reply_to_tweet,
                           reply_to = reply_to,
+                          tid = tid,
                           ).put()
             # increment tweets counter
             counter = models.Counters.all().ancestor(ancestor).get()
@@ -320,19 +321,66 @@ class StatusPage(webapp.RequestHandler):
 class ActionHandler(webapp.RequestHandler):
     """Handle 'follow', 'unfollow', 'del', 'fav' actions.
     """
+    def get_cur_user(self):
+        cur_user = users.get_current_user()
+        return models.Members.all().filter('user', cur_user).get()
+
     def follow(self, who):
         self.response.out.write("follow %s" % who)
 
     def unfollow(self, who):
         self.response.out.write("unfollow %s" % who)
 
+    def get_tweet_key(self, tweet_id):
+        q = db.Query(models.Tweets, keys_only=True)
+        q.filter('tid', int(tweet_id))
+        return q.get()
+
     def delete(self, tweet_id):
         self.response.out.write("delete %d" % int(tweet_id))
 
+    def faved_or_not(self, user, tweet_key):
+        """Return a Favorites entity"""
+        q = models.Favorites.all().ancestor(user.key()).filter('tweet', tweet_key)
+        return q.get()
+
     def favor(self, tweet_id):
-        self.response.out.write("favor %d" % int(tweet_id))
+        tweet_key = self.get_tweet_key(tweet_id)
+        if tweet_key:
+            # if faved or not
+            user = self.get_cur_user()
+            if self.faved_or_not(user, tweet_key):
+                self.response.out.write("You have faved this tweet!")
+            else:
+                # Favorites & Counters
+                def txn(user, tweet_key):
+                    models.Favorites(parent=user.key(), tweet=tweet_key).put()
+                    counter = models.Counters.get_by_key_name(
+                        key_names=user.username.lower()+'counters', parent=user)
+                    counter.favorites_counter += 1
+                    counter.put()
+                db.run_in_transaction(txn, user, tweet_key)
+        else:
+            self.error(400)
+
+    def unfavor(self, tweet_id):
+        tweet_key = self.get_tweet_key(tweet_id)
+        user = self.get_cur_user()
+        if tweet_key:
+            faved = self.faved_or_not(user, tweet_key).key()
+            if faved:
+                def txn(faved, user):
+                    db.get(faved).delete()
+                    counter = models.Counters.get_by_key_name(
+                        key_names=user.username.lower()+'counters', parent=user)
+                    counter.favorites_counter -= 1
+                    counter.put()
+                db.run_in_transaction(txn, faved, user)
+            self.response.out.write("You have not faved this tweet.")
+        else:
+            self.error(400)
 
     def get(self, action, target):
         do = {'follow': self.follow, 'unfollow': self.unfollow,
-              'del': self.delete, 'fav': self.favor,}
+              'del': self.delete, 'fav': self.favor, 'unfav': self.unfavor,}
         do[action](target)

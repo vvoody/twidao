@@ -15,6 +15,8 @@ class Tweets(db.Model):
     when = db.DateTimeProperty(auto_now_add=True)
     reply_to_tweet = db.IntegerProperty()
     reply_to = db.StringProperty()
+    # used for get the tweet directly not set the ancestor
+    tid = db.IntegerProperty()
 
 # ancestor(Members)
 class Counters(db.Model):

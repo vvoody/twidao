@@ -15,7 +15,7 @@ application = webapp.WSGIApplication([('/', MainPage),
                                       ('/notfound', NotFoundPage),
                                       ('/status/(\w+)/([0-9]+)', StatusPage),
                                       ('/(follow|unfollow)/(\w+)',ActionHandler),
-                                      ('/(del|fav)/(\d+)', ActionHandler),
+                                      ('/(del|fav|unfav)/(\d+)', ActionHandler),
                                       ('/(\w+)', UserPage),
                                       ('/.*', NotFoundPage),], debug=True)
 
