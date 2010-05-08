@@ -315,3 +315,24 @@ class StatusPage(webapp.RequestHandler):
                                }
             path = os.path.join(os.path.dirname(__file__), 'templates/status.html')
             self.response.out.write(template.render(path, template_values))
+
+# login: required
+class ActionHandler(webapp.RequestHandler):
+    """Handle 'follow', 'unfollow', 'del', 'fav' actions.
+    """
+    def follow(self, who):
+        self.response.out.write("follow %s" % who)
+
+    def unfollow(self, who):
+        self.response.out.write("unfollow %s" % who)
+
+    def delete(self, tweet_id):
+        self.response.out.write("delete %d" % int(tweet_id))
+
+    def favor(self, tweet_id):
+        self.response.out.write("favor %d" % int(tweet_id))
+
+    def get(self, action, target):
+        do = {'follow': self.follow, 'unfollow': self.unfollow,
+              'del': self.delete, 'fav': self.favor,}
+        do[action](target)

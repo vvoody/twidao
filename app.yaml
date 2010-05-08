@@ -35,6 +35,20 @@ handlers:
 - url: /(\w+)
   script: main.py
 #
+# Actions
+- url: /follow/.*
+  script: main.py
+  login: required
+- url: /unfollow/.*
+  script: main.py
+  login: required
+- url: /del/.*
+  script: main.py
+  login: required
+- url: /fav/.*
+  script: main.py
+  login: required
+#
 # Tasks requests -> /task/QUEUE_NAME/ACTION_HANDLER
 - url: /task/avatar/resize
   script: task.py
