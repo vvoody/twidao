@@ -186,7 +186,7 @@ function removeElement(_element){
     {% ifequal tweet.bywho user.key.name %}
     <img class="action" src="static/del.png" alt="del" onClick="del_tweet(this, {{ tweet.tid }});"/>
     {% endifequal %}
-    <img class="action" src="static/unfaved.png" alt="unfav this tweet" id="{{ tweet.tid }}" onClick="fav_or_unfav(this)" />
+    <img class="action" src="static/unfaved.png" alt="fav this tweet" id="{{ tweet.tid }}" onClick="fav_or_unfav(this)" />
     {%if not page_user %}
     <img class="action" src="static/rt.png" alt="rt" onClick="rt({{ tweet.tid }}, '{{ tweet.bywho }}');"/>
     {% ifnotequal tweet.bywho user.key.name %}
