@@ -317,6 +317,34 @@ class StatusPage(webapp.RequestHandler):
             path = os.path.join(os.path.dirname(__file__), 'templates/status.html')
             self.response.out.write(template.render(path, template_values))
 
+class FavoritesPage(webapp.RequestHandler):
+    def show_user_favorites(self, user, next_page):
+        q = models.Favorites.all().ancestor(user.key())
+        if next_page:
+            q.with_cursor(next_page)
+        res = q.fetch(20)
+        tweets = db.get([t.tweet.key() for t in res])
+        next_page = q.cursor()
+        login_url = users.create_login_url('/')
+        logout_url = users.create_logout_url('/')
+        template_values = {'user': user,
+                           'pagetype': 'user favorites',
+                           'logout_url': logout_url, 'login_url': login_url,
+                           'tweets': tweets,
+                           'page_size': len(tweets),'next_page': next_page,
+                           }
+        path = os.path.join(os.path.dirname(__file__), 'templates/favorites.html')
+        self.response.out.write(template.render(path, template_values))
+
+    def get(self):
+        cur_user = users.get_current_user()
+        user = models.Members.all().filter('user', cur_user).get()
+        if not user:
+            login_url = users.create_login_url('/favorites')
+            self.redirect(login_url)
+        else:
+            self.show_user_favorites(user, self.request.get('next_page'))
+
 # login: required
 class ActionHandler(webapp.RequestHandler):
     """Handle 'follow', 'unfollow', 'del', 'fav' actions.

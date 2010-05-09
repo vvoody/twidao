@@ -1,0 +1,107 @@
+{% extends "layout.html" %}
+{% block title %}
+  {% ifequal pagetype 'user favorites' %}
+    {{ user.username }}'s Favorites
+  {% endifequal %}
+{% endblock %}
+
+{% block body %}
+  {% if user %}
+    <h2>{{ user.username }}'s Favorites</h2>
+  {% endif %}
+
+<script type="text/javascript">
+
+var xmlHttp;
+var obj;
+
+function createXMLHttpRequest()
+ {
+ try
+    {
+   // Firefox, Opera 8.0+, Safari
+    xmlHttp=new XMLHttpRequest();
+    }
+ catch (e)
+    {
+
+  // Internet Explorer
+   try
+      {
+      xmlHttp=new ActiveXObject("Msxml2.XMLHTTP");
+      }
+   catch (e)
+      {
+
+      try
+         {
+         xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
+         }
+      catch (e)
+         {
+         alert("您的浏览器不支持AJAX！");
+         return false;
+         }
+      }
+    }
+}
+
+function fav_or_unfav(element_id)
+{
+    createXMLHttpRequest();
+    obj = element_id;
+    xmlHttp.onreadystatechange=fav_handler;
+    if (obj.alt == "unfav this tweet") {
+        xmlHttp.open("GET","/unfav/"+obj.id,true);
+    }
+    else if (obj.alt == "fav this tweet") {
+        xmlHttp.open("GET","/fav/"+obj.id,true);
+    }
+    xmlHttp.send(null);
+}
+
+function fav_handler()
+      {
+      if(xmlHttp.readyState==4)
+        {
+          if(xmlHttp.status == 200) {
+              if(obj.alt == "fav this tweet") {
+                  obj.src = "/static/faved.png";
+                  obj.alt = "unfav this tweet";
+              }
+              else if(obj.alt == "unfav this tweet") {
+                  obj.src = "/static/unfaved.png";
+                  obj.alt = "fav this tweet";
+              }
+          }
+//          alert(xmlHttp.responseText);
+        }
+        else {
+            obj.src = "/static/loader.gif";
+        }
+      }
+</script>
+
+<!-- tweets body -->
+  <ul class=messages>
+ {% for tweet in tweets %}
+    <li><img class="avatar" src="/avatar/{{ tweet.bywho }}"><p>
+      <strong><a href="/{{ tweet.bywho }}">{{ tweet.bywho }}</a></strong>
+      {{ tweet.content|escape }}
+<!---->
+<br><br>
+<small align="left">
+&mdash; <a href="/status/{{ tweet.bywho }}/{{ tweet.key.id }}" style="color: #888;">
+    {{ tweet.when|timesince }} ago</a>
+</small>
+    <img class="action" src="static/faved.png" alt="unfav this tweet" id="{{ tweet.tid }}" onClick="fav_or_unfav(this)"/>
+ {% endfor %}
+  </ul>
+
+<div style="float: right;">
+{% ifequal page_size 20 %}
+<a href="javascript:history.go(-1);">Previous</a>&nbsp;
+<a href="/?next_page={{ next_page }}">Next</a>
+{% endifequal %}
+</div><br />
+{% endblock %}
