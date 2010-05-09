@@ -156,7 +156,8 @@ class SignupPage(webapp.RequestHandler):
         self.response.out.write(template.render(path, template_values))
 
     def validator(self, *args):
-        return args
+        # username, fullname, bio
+        return (args[0].lower(), args[1], args[2])
 
     def register_member(self, username, fullname, bio):
         def store_to_Members(username, fullname, bio):
