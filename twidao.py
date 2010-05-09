@@ -253,15 +253,16 @@ class SettingPage(webapp.RequestHandler):
 
 # Deal with request like /avatar/john/bigger
 class AvatarsHandler(webapp.RequestHandler):
-    def get(self, user, size='normal'):
+    def get(self, username, size='normal'):
+        username = username.lower()
         if size not in ('origin', 'bigger', 'normal'):
             self.redirect('/notfound')
-        avatar = models.Avatars.get_by_key_name(user+size)
+        avatar = models.Avatars.get_by_key_name(username+size)
         if avatar:
             self.response.headers['Content-Type'] = 'image'
             self.response.out.write(avatar.content)
         # registered but not upload avatar yet
-        elif models.Members.get_by_key_name(user):
+        elif models.Members.get_by_key_name(username):
             self.redirect('/static/default_avatar_%s.png' % size)
         else:
             self.redirect('/notfound')
