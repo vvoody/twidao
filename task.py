@@ -85,7 +85,7 @@ class RepliesHandler(webapp.RequestHandler):
         ancestor = models.Members.get_by_key_name(tuser)
         tweet = models.Tweets.get_by_id(tid, ancestor)
         if tweet.reply_to_tweet != None:
-            self.validate_reply_to(tweet, tweet.reply_to_tweet, reply_to)
+            self.validate_reply_to(tweet, tweet.reply_to_tweet, tweet.reply_to)
         elif tweet.reply_to != None:  # reply to unknown tweet
             tweet.reply_to = None
             tweet.put()
