@@ -385,10 +385,65 @@ class ActionHandler(webapp.RequestHandler):
         return models.Members.all().filter('user', cur_user).get()
 
     def follow(self, who):
-        self.response.out.write("follow %s" % who)
+        # self.Members.following & Counters
+        # who.Members.followers & Counters
+        user = self.get_cur_user()
+        foed = models.Members.get_by_key_name(who.lower())
+        if not foed.username.lower() in user.following:
+            user.following.append(foed.username.lower())
+            user.put()
+            user_counter = models.Counters.get_by_key_name(
+                user.username.lower()+'counters', parent=user)
+            user_counter.following_counter += 1
+            user_counter.put()
+        if not user.username.lower() in foed.followers:
+            foed.followers.append(user.username.lower())
+            foed.put()
+            foed_counter = models.Counters.get_by_key_name(
+                foed.username.lower()+'counters', parent=foed)
+            foed_counter.followers_counter += 1
+            foed_counter.put()
+        # Push who's tweets into my TimelineQueue
+        q = models.Tweets.all().ancestor(foed.key()).order('-when')
+        # insert 100 tweets to my timeline queue, no more
+        tweets = q.fetch(100)
+        for t in tweets:
+            # maybe foed was foed before...
+            models.TimelineQueue(parent=user,
+                                 tweet= t.key(),
+                                 bywho= t.bywho,
+                                 when= t.when,
+                                 ).put()
+        # End of follow action
 
     def unfollow(self, who):
-        self.response.out.write("unfollow %s" % who)
+        user = self.get_cur_user()
+        unfoed = models.Members.get_by_key_name(who.lower())
+        if unfoed.username.lower() in user.following:
+            user.following.remove(unfoed.username.lower())
+            user.put()
+            user_counter = models.Counters.get_by_key_name(
+                user.username.lower()+'counters', parent=user)
+            user_counter.following_counter -= 1
+            user_counter.put()
+        if user.username.lower() in unfoed.followers:
+            unfoed.followers.remove(user.username.lower())
+            unfoed.put()
+            unfoed_counter = models.Counters.get_by_key_name(
+                unfoed.username.lower()+'counters', parent=unfoed)
+            unfoed_counter.followers_counter -= 1
+            unfoed_counter.put()
+        # TimelineQueue
+        q = models.TimelineQueue.all().ancestor(user).filter('bywho', unfoed.username)
+        res = q.fetch(100)
+        cursor = q.cursor()
+        while 0 < len(res) <= 100:
+            for r in res:
+                r.active = False
+                r.put()
+            q.with_cursor(cursor)
+            res = q.fetch(100)
+        # End of unfollow action
 
     def get_tweet_key(self, tweet_id):
         q = db.Query(models.Tweets, keys_only=True)
