@@ -352,6 +352,31 @@ class FavoritesPage(webapp.RequestHandler):
             self.show_user_favorites(user, self.request.get('next_page'))
 
 # login: required
+class RepliesPage(webapp.RequestHandler):
+    def show_user_replies(self, user, next_page):
+        q = models.Replies.all().ancestor(user.key())
+        if next_page:
+            q.with_cursor(next_page)
+        res = q.fetch(20)
+        tweets = db.get([t.tweet.key() for t in res])
+        next_page = q.cursor()
+        login_url = users.create_login_url('/')
+        logout_url = users.create_logout_url('/')
+        template_values = {'user': user,
+                           'pagetype': 'user replies',
+                           'logout_url': logout_url, 'login_url': login_url,
+                           'tweets': tweets,
+                           'page_size': len(tweets),'next_page': next_page,
+                           }
+        path = os.path.join(os.path.dirname(__file__), 'templates/replies.html')
+        self.response.out.write(template.render(path, template_values))
+
+    def get(self):
+        cur_user = users.get_current_user()
+        user = models.Members.all().filter('user', cur_user).get()
+        self.show_user_replies(user, self.request.get('next_page'))
+
+# login: required
 class ActionHandler(webapp.RequestHandler):
     """Handle 'follow', 'unfollow', 'del', 'fav' actions.
     """

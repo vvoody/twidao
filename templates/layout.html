@@ -14,6 +14,7 @@
     {% else %}
       <a href="/">home</a> |
       <a href="{{ user.username }}">profile</a> |
+      <a href="/replies">replies</a> |
       <a href="/setting">setting</a> |
       <a href="{{ logout_url }}">sign out [{{ user.username }}]</a>
     {% endif %}

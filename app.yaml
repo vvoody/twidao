@@ -34,6 +34,9 @@ handlers:
   script: main.py
 - url: /favorites
   script: main.py
+- url: /replies
+  script: main.py
+  login: required
 - url: /(\w+)
   script: main.py
 #
