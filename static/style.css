@@ -6,10 +6,12 @@ body {
 
 a {
     color: #26776F;
+    text-decoration: none;
 }
 
 a:hover {
     color: #333;
+    text-decoration: underline;
 }
 
 input[type="text"],
