@@ -60,7 +60,7 @@ class MainPage(webapp.RequestHandler):
             if next_page:
                 q.with_cursor(next_page)
             res = q.fetch(20)
-            tweets = db.get(map(lambda x: x.tweet.key(), res))
+            tweets = db.get([t.tweet.key() for t in res])
             next_page = q.cursor()
             logout_url = users.create_logout_url('/')
             self.template_values = {'user': self.user,
@@ -395,8 +395,41 @@ class ActionHandler(webapp.RequestHandler):
         q.filter('tid', int(tweet_id))
         return q.get()
 
+    # tweet_id is string
     def delete(self, tweet_id):
-        self.response.out.write("delete %d" % int(tweet_id))
+        user = self.get_cur_user()
+        tweet = models.Tweets.get_by_id(int(tweet_id), parent=user)
+        # is the owner
+        if tweet:
+            # Tweets & Counters in a transaction
+            def txn1(user, tweet):
+                tweet.delete()
+                counter = models.Counters.get_by_key_name(
+                    key_names=user.username.lower()+'counters', parent=user)
+                counter.tweets_counter -= 1
+                counter.put()
+            db.run_in_transaction(txn1, user, tweet)
+            # TimelineQueue & Replies (Favorites needed rewrite)
+            q1 = models.TimelineQueue.all().filter('tweet', tweet.key())
+            res1 = q1.fetch(11)
+            cursor1 = q1.cursor()
+            while 0 < len(res1) <= 11:
+                for t in res1:
+                    t.active = False
+                    t.put()
+                q1.with_cursor(cursor1)
+                res1 = q1.fetch(11)
+            #
+            q2 = models.Replies.all().filter('tweet', tweet.key())
+            res2 = q2.fetch(11)
+            cursor2 = q2.cursor()
+            while 0 < len(res2) <= 11:
+                for t in res2:
+                    t.delete()
+                q2.with_cursor(cursor2)
+                res2 = q2.fetch(11)
+        else:
+            self.error(400)
 
     def faved_or_not(self, user, tweet_key):
         """Return a Favorites entity"""

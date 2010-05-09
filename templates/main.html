@@ -100,6 +100,36 @@ function reply_to(tid, bywho)
     c.value = "@" + bywho + " ";
     c.focus();
 }
+
+function del_tweet(action_icon, tid)
+{
+    createXMLHttpRequest();
+    xmlHttp.onreadystatechange = function()
+    {
+      if(xmlHttp.readyState==4)
+        {
+          if(xmlHttp.status == 200) {
+               t = document.getElementById("tweet_"+tid);
+               removeElement(t);
+          }
+          else {
+              alert("Ooops...");
+          }
+        }
+        else {
+            action_icon.src = "/static/loader.gif";
+        }
+    }
+    xmlHttp.open("GET","/del/"+tid,true);
+    xmlHttp.send(null);
+}
+
+function removeElement(_element){
+         var _parentElement = _element.parentNode;
+         if(_parentElement){
+                _parentElement.removeChild(_element);
+         }
+}
 </script>
 
   {% if page_user %}
@@ -138,15 +168,15 @@ function reply_to(tid, bywho)
   {% endif %}
 
 <!-- tweets body -->
-  <ul class=messages>
+  <ul class=messages id="messages_body">
  {% for tweet in tweets %}
-    <li><img class="avatar" src="/avatar/{{ tweet.bywho }}"><p>
+    <li id="tweet_{{ tweet.tid }}"><img class="avatar" src="/avatar/{{ tweet.bywho }}"><p>
       <strong><a href="/{{ tweet.bywho }}">{{ tweet.bywho }}</a></strong>
       <span id="status_{{ tweet.tid }}">{{ tweet.content|escape }}</span>
 <!---->
 <br><br>
 <small align="left">
-&mdash; <a href="/status/{{ tweet.bywho }}/{{ tweet.key.id }}" style="color: #888;">
+&mdash; <a href="/status/{{ tweet.bywho }}/{{ tweet.tid }}" style="color: #888;">
     {{ tweet.when|timesince }} ago</a> via web
 {% if tweet.reply_to %}
 <a href="/status/{{ tweet.reply_to }}/{{ tweet.reply_to_tweet }}" style="color: #888;">in reply to {{ tweet.reply_to }}</a>
@@ -154,7 +184,7 @@ function reply_to(tid, bywho)
 </small>
   {% if user %}
     {% ifequal tweet.bywho user.key.name %}
-    <img class="action" src="static/del.png" alt="del" />
+    <img class="action" src="static/del.png" alt="del" onClick="del_tweet(this, {{ tweet.tid }});"/>
     {% endifequal %}
     <img class="action" src="static/unfaved.png" alt="unfav this tweet" id="{{ tweet.tid }}" onClick="fav_or_unfav(this)" />
     {%if not page_user %}
