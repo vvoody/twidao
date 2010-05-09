@@ -12,6 +12,96 @@
 {% endblock %}
 
 {% block body %}
+<script type="text/javascript">
+
+var xmlHttp;
+var obj;
+
+function createXMLHttpRequest()
+ {
+ try
+    {
+   // Firefox, Opera 8.0+, Safari
+    xmlHttp=new XMLHttpRequest();
+    }
+ catch (e)
+    {
+
+  // Internet Explorer
+   try
+      {
+      xmlHttp=new ActiveXObject("Msxml2.XMLHTTP");
+      }
+   catch (e)
+      {
+
+      try
+         {
+         xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
+         }
+      catch (e)
+         {
+         alert("您的浏览器不支持AJAX！");
+         return false;
+         }
+      }
+    }
+}
+
+function fav_or_unfav(element_id)
+{
+    createXMLHttpRequest();
+    obj = element_id;
+    xmlHttp.onreadystatechange=fav_handler;
+    if (obj.alt == "unfav this tweet") {
+        xmlHttp.open("GET","/unfav/"+obj.id,true);
+    }
+    else if (obj.alt == "fav this tweet") {
+        xmlHttp.open("GET","/fav/"+obj.id,true);
+    }
+    xmlHttp.send(null);
+}
+
+function fav_handler()
+      {
+      if(xmlHttp.readyState==4)
+        {
+          if(xmlHttp.status == 200) {
+              if(obj.alt == "fav this tweet") {
+                  obj.src = "/static/faved.png";
+                  obj.alt = "unfav this tweet";
+              }
+              else if(obj.alt == "unfav this tweet") {
+                  obj.src = "/static/unfaved.png";
+                  obj.alt = "fav this tweet";
+              }
+          }
+//          alert(xmlHttp.responseText);
+        }
+        else {
+            obj.src = "/static/loader.gif";
+        }
+      }
+
+function rt(tid, bywho)
+{
+    t = document.getElementById("status_"+tid);
+    tbox = document.getElementById("tweet-box");
+    tbox.value = "RT @" + bywho + ": " + t.textContent;
+}
+
+function reply_to(tid, bywho)
+{
+    a = document.getElementById("reply_to");
+    b = document.getElementById("reply_to_tweet");
+    a.value = bywho;
+    b.value = tid;
+    c = document.getElementById("tweet-box");
+    c.value = "@" + bywho + " ";
+    c.focus();
+}
+</script>
+
   {% if page_user %}
     <h2>{{ page_user.username }}'s Timeline</h2>
   {% else %}
@@ -38,7 +128,9 @@
       <div class=twitbox>
         <h3>What's on your mind {{ user.username }}?</h3>
         <form action="/" method=post>
-          <p><input type="text" name="tweet" size=60><!--
+          <p><input id="reply_to" type="hidden" name="reply_to" value="">
+            <input id="reply_to_tweet" type="hidden" name="reply_to_tweet" value="">
+            <input id="tweet-box" type="text" name="tweet" size=60><!--
           --><input type="submit" value="Say it!">
         </form>
       </div>
@@ -50,20 +142,26 @@
  {% for tweet in tweets %}
     <li><img class="avatar" src="/avatar/{{ tweet.bywho }}"><p>
       <strong><a href="/{{ tweet.bywho }}">{{ tweet.bywho }}</a></strong>
-      {{ tweet.content|escape }}
+      <span id="status_{{ tweet.tid }}">{{ tweet.content|escape }}</span>
 <!---->
 <br><br>
 <small align="left">
 &mdash; <a href="/status/{{ tweet.bywho }}/{{ tweet.key.id }}" style="color: #888;">
-    {{ tweet.when|timesince }} ago</a>
+    {{ tweet.when|timesince }} ago</a> via web
+{% if tweet.reply_to %}
+<a href="/status/{{ tweet.reply_to }}/{{ tweet.reply_to_tweet }}" style="color: #888;">in reply to {{ tweet.reply_to }}</a>
+{% endif %}
 </small>
   {% if user %}
+    {% ifequal tweet.bywho user.key.name %}
     <img class="action" src="static/del.png" alt="del" />
-    <img class="action" src="static/unfaved.png" alt="fav" />
+    {% endifequal %}
+    <img class="action" src="static/unfaved.png" alt="unfav this tweet" id="{{ tweet.tid }}" onClick="fav_or_unfav(this)" />
     {%if not page_user %}
-    <img class="action" src="static/retweet.png" alt="retweet" />
-    <img class="action" src="static/rt.png" alt="rt" />
-    <img class="action" src="static/reply.png" alt="reply" />
+    <img class="action" src="static/rt.png" alt="rt" onClick="rt({{ tweet.tid }}, '{{ tweet.bywho }}');"/>
+    {% ifnotequal tweet.bywho user.key.name %}
+    <img class="action" src="static/reply.png" alt="reply" onClick="reply_to({{ tweet.tid }}, '{{ tweet.bywho }}');"/>
+    {% endifnotequal %}
     {% endif %}
   {% endif %}
  {% endfor %}

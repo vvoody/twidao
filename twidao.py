@@ -102,7 +102,11 @@ class MainPage(webapp.RequestHandler):
         return tid
 
     def validator(self, *args):
-        return (args[0], None, None)
+        # 1. tweet, 2. reply_to_tweet, 3. reply_to
+        if args[1] != '' and args[2] != '':
+            return (args[0], int(args[1]), args[2])
+        else:
+            return (args[0], None, None)
 
     def post(self):
         if not self.user:
@@ -116,6 +120,7 @@ class MainPage(webapp.RequestHandler):
         # 2. Counters
         # 3.1 TimelineQueue, ancestor(self)
         # 1, 2 & 3.1 in the same transaction(cuz of same entity group / ancestor)
+        #self.response.out.write("'%s', '%d', '%s'" % (tweet_content, reply_to_tweet, reply_to))
         username = self.user.username.lower()
         tid = self.store_tweet(tweet_content,
                                username,
