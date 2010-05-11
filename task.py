@@ -5,6 +5,9 @@ from google.appengine.api import images
 import models
 import re
 
+# Copyright (C) 2010-2012 vvoody <ydoovv@gmail.com>
+# Souce codes licensed under GPLv3, see LICENSE.
+
 class ResizeAvatar(webapp.RequestHandler):
     """Resize the avatar image file uploaded to smaller and much smaller size.
     """

@@ -7,6 +7,9 @@ import os
 import models
 from datetime import datetime
 
+# Copyright (C) 2010-2012 vvoody <ydoovv@gmail.com>
+# Souce codes licensed under GPLv3, see LICENSE.
+
 def increment_counter(counter_name, amount):
     obj = models.SysCounters.get_by_key_name(counter_name)
     obj.counter += amount

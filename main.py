@@ -7,6 +7,9 @@ import os
 import models
 from twidao import MainPage, SignupPage, SettingPage, AvatarsHandler, NotFoundPage, UserPage, StatusPage, ActionHandler, FavoritesPage, RepliesPage
 
+# Copyright (C) 2010-2012 vvoody <ydoovv@gmail.com>
+# Souce codes licensed under GPLv3, see LICENSE.
+
 application = webapp.WSGIApplication([('/', MainPage),
                                       ('/signup', SignupPage),
                                       ('/setting', SettingPage),

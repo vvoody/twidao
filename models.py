@@ -1,5 +1,8 @@
 from google.appengine.ext import db
 
+# Copyright (C) 2010-2012 vvoody <ydoovv@gmail.com>
+# Souce codes licensed under GPLv3, see LICENSE.
+
 class Members(db.Model):
     user = db.UserProperty()        # users.get_current_user()
     username = db.StringProperty()  # unique in this site, immutable(/signup)
