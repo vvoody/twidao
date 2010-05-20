@@ -68,6 +68,10 @@ handlers:
   script: task.py
   login: admin
 #
+# API
+- url: /api/status/.*
+  script: api.py
+#
 - url: /admin/.*
   script: $PYTHON_LIB/google/appengine/ext/admin
   login: admin
