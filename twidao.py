@@ -10,14 +10,14 @@ from datetime import datetime
 # Copyright (C) 2010-2012 vvoody <ydoovv@gmail.com>
 # Souce codes licensed under GPLv3, see LICENSE.
 
-def increment_counter(cnt, amount):
+def increase_counter(cnt, amount):
     cnt.counter += amount
     cnt.put()
     return cnt.counter
 
 def get_new_tweet_id():
     counter = models.SysCounters.get_or_insert('tweet_id')
-    return int(db.run_in_transaction(increment_counter, counter, 1))
+    return int(db.run_in_transaction(increase_counter, counter, 1))
 
 class NotFoundPage(webapp.RequestHandler):
     def get(self):
