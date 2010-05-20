@@ -11,7 +11,7 @@ from datetime import datetime
 # Souce codes licensed under GPLv3, see LICENSE.
 
 def increment_counter(counter_name, amount):
-    obj = models.SysCounters.get_by_key_name(counter_name)
+    obj = models.SysCounters.get_or_insert(counter_name)
     obj.counter += amount
     obj.put()
     return obj.counter
