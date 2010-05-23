@@ -139,6 +139,7 @@ class MainPage(webapp.RequestHandler):
         taskqueue.Task(url='/task/tweets/replies?tid=%d&user=%s' % (tid, username),
                        method='GET',
                        ).add(queue_name='tweets')
+        self.redirect('/')
         # End of MainPage
 
 # login: required
@@ -418,6 +419,7 @@ class ActionHandler(webapp.RequestHandler):
                                  bywho= t.bywho,
                                  when= t.when,
                                  ).put()
+        self.redirect('/')
         # End of follow action
 
     def unfollow(self, who):
@@ -447,6 +449,7 @@ class ActionHandler(webapp.RequestHandler):
                 r.put()
             q.with_cursor(cursor)
             res = q.fetch(100)
+        self.redirect('/')
         # End of unfollow action
 
     def get_tweet_key(self, tweet_id):
@@ -535,3 +538,32 @@ class ActionHandler(webapp.RequestHandler):
         do = {'follow': self.follow, 'unfollow': self.unfollow,
               'del': self.delete, 'fav': self.favor, 'unfav': self.unfavor,}
         do[action](target)
+
+class DirectsPage(webapp.RequestHandler):
+    def __init__(self):
+        self.cur_user = users.get_current_user()
+        self.user = models.Members.all().filter('user', self.cur_user).get()
+
+    def get(self):
+        q = models.Directs.all().filter('receiver', self.user.username)
+        directs = q.fetch(10)
+        login_url = users.create_login_url('/')
+        logout_url = users.create_logout_url('/')
+        template_values = {'user': self.user,
+                           'pagetype': 'user directs',
+                           'logout_url': logout_url, 'login_url': login_url,
+                           'directs': directs,
+                           }
+        path = os.path.join(os.path.dirname(__file__), 'templates/directs.html')
+        self.response.out.write(template.render(path, template_values))
+
+    def post(self):
+        receiver = self.request.get('receiver').strip()
+        msg = self.request.get('msg').strip()
+        if len(receiver) > 0 and len(msg) > 0:
+            models.Directs(sender=self.user.username,
+                           receiver=receiver,
+                           content=msg).put()
+            self.response.out.write("Send successfully!")
+        else:
+            self.response.out.write("Unknown user!")

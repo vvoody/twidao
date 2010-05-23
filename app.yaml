@@ -1,4 +1,4 @@
-application: apptemplate
+application: twidao
 version: 1
 runtime: python
 api_version: 1
@@ -35,6 +35,9 @@ handlers:
 - url: /favorites
   script: main.py
 - url: /replies
+  script: main.py
+  login: required
+- url: /directs
   script: main.py
   login: required
 - url: /(\w+)

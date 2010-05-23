@@ -57,3 +57,9 @@ class SysCounters(db.Model):
 # key_name -> username+size like 'katenormal'
 class Avatars(db.Model):
     content = db.BlobProperty()
+
+# Directs
+class Directs(db.Model):
+    sender = db.StringProperty()
+    receiver = db.StringProperty()
+    content = db.StringProperty()
